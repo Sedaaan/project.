@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Путеводитель по техническим вузам России</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden; /* Убираем горизонтальный скролл */
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-height: 95vh; /* Ограничиваем высоту контейнера */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            flex-shrink: 0; /* Запрещаем сжатие хедера */
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .step {
+            padding: 25px;
+            display: none;
+            flex: 1; /* Занимаем все доступное пространство */
+            overflow-y: auto; /* Скролл только внутри шага */
+            max-height: calc(95vh - 200px); /* Ограничиваем высоту с учетом хедера и прогресс-бара */
+        }
+        
+        .step.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            flex-shrink: 0; /* Запрещаем сжатие заголовка */
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            flex: 1; /* Занимаем все доступное пространство */
+            overflow-y: auto; /* Скролл только внутри сетки */
+            padding-right: 5px; /* Отступ для скроллбара */
+        }
+        
+        /* Стили для скроллбара */
+        .options-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .options-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .options-grid::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        .options-grid::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        .option-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0; /* Запрещаем сжатие карточек */
+        }
+        
+        .option-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .option-card.selected {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            flex-shrink: 0; /* Запрещаем сжатие кнопок навигации */
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-prev {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-next {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-prev:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn-next:hover {
+            background: #2980b9;
+        }
+        
+        .btn-next:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .specialty-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            border-left: 5px solid #3498db;
+            flex: 1;
+            overflow-y: auto; /* Скролл для информации о специальности */
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 200px;
+        }
+        
+        .info-value {
+            color: #34495e;
+            text-align: right;
+            flex: 1;
+        }
+        
+        .subjects {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        
+        .subject-tag {
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        
+        .description {
+            line-height: 1.6;
+            color: #555;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .progress-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            flex-shrink: 0; /* Запрещаем сжатие прогресс-бара */
+        }
+        
+        .progress-step {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #bdc3c7;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 8px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .progress-step.active {
+            background: #3498db;
+        }
+        
+        .progress-step.completed {
+            background: #27ae60;
+        }
+        
+        .stats {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .city-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .university-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .specialty-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .option-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .specialty-image {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .curriculum-link {
+            margin-top: 15px;
+            padding: 12px;
+            background: #e8f4fd;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .curriculum-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .curriculum-link a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .info-label {
+                min-width: auto;
+            }
+            
+            .subjects {
+                justify-content: flex-start;
+            }
+            
+            .container {
+                max-height: 90vh; /* Уменьшаем высоту на мобильных */
+            }
+            
+            .step {
+                max-height: calc(90vh - 200px); /* Корректируем высоту шага */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Профориентационный гайд для учащихся технологических классов Политехнической гимназии</h1>
+            <p>Выберите город, вуз и специальность для получения подробной информации</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-step completed" id="step1-progress">1</div>
+            <div class="progress-step" id="step2-progress">2</div>
+            <div class="progress-step" id="step3-progress">3</div>
+            <div class="progress-step" id="step4-progress">4</div>
+        </div>
+        
+        <!-- Шаг 1: Выбор города -->
+        <div class="step active" id="step1">
+            <h2>Выберите город</h2>
+            <div class="options-grid" id="cities-container">
+                <!-- Города будут добавлены через JavaScript -->
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevStep()" disabled>Назад</button>
+                <button class="btn-next" onclick="nextStep()" id="step1-next" disabled style="display: none;">Далее</button>
+            </div>
+        </div>
+        
+        <!-- Шаг 2: Выбор вуза -->
+        <div class="step" id="step2">
+            <h2>Выберите вуз</h2>
+            <div class="options-grid" id="universities-container">
+                <!-- Вузы будут добавлены через JavaScript -->
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevStep()">Назад</button>
+                <button class="btn-next" onclick="nextStep()" id="step2-next" disabled style="display: none;">Далее</button>
+            </div>
+        </div>
+        
+        <!-- Шаг 3: Выбор специальности -->
+        <div class="step" id="step3">
+            <h2>Выберите специальность</h2>
+            <div class="options-grid" id="specialties-container">
+                <!-- Специальности будут добавлены через JavaScript -->
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevStep()">Назад</button>
+                <button class="btn-next" onclick="nextStep()" id="step3-next" disabled style="display: none;">Далее</button>
+            </div>
+        </div>
+        
+        <!-- Шаг 4: Информация о специальности -->
+        <div class="step" id="step4">
+            <h2>Информация о специальности</h2>
+            <div id="specialty-details">
+                <!-- Информация будет добавлена через JavaScript -->
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-prev" onclick="prevStep()">Назад</button>
+                <button class="btn-next" onclick="restartGuide()">Начать заново</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Функция для преобразования сокращений в полные названия предметов
+        function getFullSubjectName(abbr) {
+            const subjectsMap = {
+                'р': 'Русский язык',
+                'м': 'Математика (профиль)',
+                'и': 'Информатика',
+                'ф': 'Физика',
+                'х': 'Химия',
+                'б': 'Биология',
+                'о': 'Обществознание',
+                'г': 'География',
+                'ист': 'История'
+            };
+            
+            return subjectsMap[abbr] || abbr;
+        }
+
+        // Функция для преобразования списка предметов
+        function parseSubjects(subjectString) {
+            return subjectString.split(' ').map(subj => {
+                // Обрабатываем варианты с "/"
+                if (subj.includes('/')) {
+                    return subj.split('/').map(s => getFullSubjectName(s.trim())).join(' или ');
+                }
+                return getFullSubjectName(subj.trim());
+            });
+        }
+
+        // Изображения городов
+        const cityImages = {
+            "КАЗАНЬ": "https://cdn.culture.ru/images/ac39caf2-8ba3-5523-89c6-f5a78881ff49",
+            "ТЮМЕНЬ": "https://avatars.dzeninfra.ru/get-zen_doc/271828/pub_68d5404b225b82708c7e6fff_68d5413b8548541e174f8734/scale_1200",
+            "МОСКВА": "https://i.pinimg.com/originals/46/ca/ad/46caad90663d1b57f33b63c874257ffb.jpg",
+            "САНКТ-ПЕТЕРБУРГ": "https://avatars.mds.yandex.net/i?id=e168170c0ea7b959cd5af038cc4fb471_l-4464889-images-thumbs&n=13",
+            "ЕКАТЕРИНБУРГ": "https://s7.planeta.ru/i/3dd7ff/1710350985502_renamed.jpg",
+            "НОВОСИБИРСК": "https://sdelanounas.ru/i/a/w/1/f_aW1nLmdlbGlvcGhvdG8uY29tL25zazIwMjAvMDlfbnNrMjAyMC5qcGc_X19pZD0xMzcxMTc=.jpeg"
+        };
+
+        // Изображения вузов
+        const universityImages = {
+            "КГЭУ": "https://i.vuzopedia.ru/storage/app/uploads/public/5a3/a41/fb3/5a3a41fb32182762564344.jpg",
+            "КФУ": "https://tatarstan.ru/file/news/28_n2330524_big.jpg",
+            "КНИТУ": "https://cdn.culture.ru/images/f13659b3-9f3c-5760-9466-5dbd24b04d58",
+            "ТюмГУ": "https://static.mk.ru/upload/entities/2024/12/28/10/articles/facebookPicture/6e/4e/15/6b/e4e1f3e3866c602f77b0abb25f055df1.jpg",
+            "ТИУ": "https://old.tyuiu.ru/wp-content/uploads/2015/05/image70340208.jpg",
+            "МЭИ": "https://avatars.mds.yandex.net/i?id=9cac44b6f884e971709ceec3ce93ae1b_l-5427734-images-thumbs&n=13",
+            "МАИ": "https://img.tsargrad.tv/cache/6/6/20210909_gaf_rk39_029.jpg/w720h405fill.jpg",
+            "МГТУ им. Баумана": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Moscow_MSTU_Bauman_main_building_asv2021-08.jpg/960px-Moscow_MSTU_Bauman_main_building_asv2021-08.jpg",
+            "РГУ Нефти и газа (Губкин)": "https://cdn1.img.sputniknews.uz/img/701/22/7012254_0:127:1251:835_2072x0_60_0_0_034936af0366bc7aeda2e3a26f5db2ea.jpg",
+            "ИТМО": "https://media.fulledu.ru/documents/covers/2018.04.13.11/article/100060000000000000003045.jpg",
+            "СПбПУ": "https://www.atomic-energy.ru/files/styles/first_foto/public/images/2025/07/106-1.jpg",
+            "ЛЭТИ": "https://static.foto.ru/foto/images/photos/000/000/745/745263_image_origin.jpg?1705171345",
+            "УРФУ": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Ural_State_Technical_University_%28July_2022%29_-_5.jpg/960px-Ural_State_Technical_University_%28July_2022%29_-_5.jpg",
+            "УРГУПС": "https://i4.photo.2gis.com/images/branch/9/1266637439886981_b410.jpg",
+            "НГТУ": "https://www.nntu.ru/frontend/web/ngtu/files/universitet/privetstvie_rectora/ngtu_1korpus.jpg",
+            "СГУГиТ": "https://static.mk.ru/upload/entities/2020/03/26/08/articles/detailPicture/24/6a/14/1e/e0c639875c06d572309c97aba507c08f.jpg"
+        };
+
+        // Ссылки на учебные планы
+        const curriculumLinks = {
+            "УРФУ": {
+                "МАТЕМАТИКА": "https://programs.edu.urfu.ru/media/documents/00103193.pdf",
+                "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ": "https://programs.edu.urfu.ru/media/documents/00103192.pdf",
+                "ПРИКЛАДНАЯ МАТЕМАТИКА": "https://programs.edu.urfu.ru/media/documents/00103211.pdf",
+                "МАТЕМАТИКА И КОМПЬЮТЕРНЫЕ НАУКИ": "https://programs.edu.urfu.ru/media/documents/00103194.pdf",
+                "ФИЗИКА": "https://programs.edu.urfu.ru/media/documents/00101130.pdf",
+                "СТРОИТЕЛЬСТВО": "https://programs.edu.urfu.ru/media/documents/00100526.pdf",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://programs.edu.urfu.ru/media/documents/00103709.pdf",
+                "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://programs.edu.urfu.ru/media/documents/00103617.pdf",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "https://programs.edu.urfu.ru/media/documents/00103710.pdf",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://programs.edu.urfu.ru/media/documents/00103586.pdf",
+                "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА": "https://programs.edu.urfu.ru/media/documents/00100411.pdf",
+                "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА": "https://programs.edu.urfu.ru/media/documents/00101778.pdf",
+                "ЯДЕРНАЯ ФИЗИКА И ТЕХНОЛОГИИ": "https://programs.edu.urfu.ru/media/documents/00103613.pdf",
+                "МАШИНОСТРОЕНИЕ": "https://programs.edu.urfu.ru/media/documents/00098647.pdf",
+                "БИОТЕХНОЛОГИЯ": "https://programs.edu.urfu.ru/media/documents/00096144.pdf",
+                "МЕТАЛЛУРГИЯ": "https://programs.edu.urfu.ru/media/documents/00102934.pdf",
+                "БИЗНЕС-ИНФОРМАТИКА": "https://programs.edu.urfu.ru/media/documents/00101995.pdf"
+            },
+            "УРГУПС": {
+                "ТЕХНОСФЕРНАЯ БЕЗОПАСНОСТЬ": "https://www.usurt.ru/sveden/files/Priloghenie_1_TB_2022_zaoch.pdf",
+                "ПОДВИЖНОЙ СОСТАВ ЖЕЛЕЗНЫХ ДОРОГ": "https://www.usurt.ru/sveden/files/Priloghenie_1_PSn_-_2022.pdf",
+                "ЭКСПЛУАТАЦИЯ ЖЕЛЕЗНЫХ ДОРОГ": "https://www.usurt.ru/sveden/files/Priloghenie_1_ED_-_2022.pdf",
+                "СИСТЕМЫ ОБЕСПЕЧЕНИЯ ДВИЖЕНИЯ ПОЕЗДОВ": "https://www.usurt.ru/sveden/files/Priloghenie_1_SOa_-_2022.pdf",
+                "СТРОИТЕЛЬСТВО ЖЕЛЕЗНЫХ ДОРОГ, МОСТОВ И ТРАНСПОРТНЫХ ТОННЕЛЕЙ": "https://www.usurt.ru/sveden/files/Priloghenie_1_SGHDsm-2022.pdf"
+            },
+            "КГЭУ": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА": "https://kgeu.ru/upload/docs/64453/01.03.04_ОП_2021-2022.pdf",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://kgeu.ru/upload/docs/64463/09.03.01_ОП-2022.pdf",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "https://kgeu.ru/sveden/education/informatsiya-po-obrazovatelnym-programmam/09.03.03%20ОП-2023%20(ПИИ).pdf",
+                "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА": "https://kgeu.ru/op/11.03.04%20ОП-2025.pdf",
+                "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА": "https://kgeu.ru/op/13.03.01%20ОП-2025.pdf",
+                "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА": "https://kgeu.ru/sveden/education/informatsiya-po-obrazovatelnym-programmam/13-03-02-11/13.03.02%20ОП-2024%20(01.09.2024)%20(16).pdf",
+                "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ": "https://kgeu.ru/upload/docs/64515/18.03.01_ОП-2021.pdf",
+                "ЭНЕРГЕТИЧЕСКОЕ МАШИНОСТРОЕНИЕ": "https://kgeu.ru/upload/docs/64572/13.04.03_ОП-2020.pdf"
+            },
+            "КФУ": {
+                "МАТЕМАТИКА": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "ПРИКЛАДНАЯ МАТЕМАТИКА": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "МАТЕМАТИКА И КОМПЬЮТЕРНЫЕ НАУКИ": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "ФИЗИКА": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "РАДИОФИЗИКА": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "БИОТЕХНОЛОГИЯ": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "НЕФТЕГАЗОВОЕ ДЕЛО": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany",
+                "БИЗНЕС-ИНФОРМАТИКА": "https://kpfu.ru/do/uchebnyj-process/uchebnye-plany"
+            },
+            "КНИТУ": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "https://www.kstu.ru/getpilot?id=602872",
+                "МАТЕМАТИЧЕСКОЕ ОБЕСПЕЧЕНИЕ И АДМИНИСТРИРОВАНИЕ ИНФОРМАЦИОННЫХ СИСТЕМ": "https://www.kstu.ru/getpilot?id=602938",
+                "СТРОИТЕЛЬСТВО": "https://www.kstu.ru/getpilot?id=603534",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАя ТЕХНИКА": "https://www.kstu.ru/getpilot?id=602940",
+                "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ": "https://www.kstu.ru/getpilot?id=603689",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://www.kstu.ru/getpilot?id=604386",
+                "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА": "https://www.kstu.ru/getpilot?id=603535",
+                "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА": "https://www.kstu.ru/getpilot?id=602954",
+                "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ": "https://www.kstu.ru/getpilot?id=604564",
+                "БИОТЕХНОЛОГИЯ": "https://www.kstu.ru/getpilot?id=604880",
+                "НЕФТЕГАЗОВОЕ ДЕЛО": "https://www.kstu.ru/getpilot?id=604831"
+            },
+            "ТюмГУ": {
+                "МАТЕМАТИКА": "https://sveden.utmn.ru/sveden/files/eiz/80620_SHKN_UP_01.03.01_Matematika_2025_OFO(1).pdf",
+                "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ": "https://sveden.utmn.ru/sveden/files/aiq/80626_SHKN_UP_01.03.03_Mexanika_i_matematicheskoe_modelirovanie_MGHGiP_2025_OFO(1).pdf",
+                "ФИЗИКА": "https://sveden.utmn.ru/sveden/files/rit/80518_SHEN_UP_03.03.02_Fizika_Fizika_neftyanogo_i_gazovogo_plasta_OFO_2023.pdf",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "https://sveden.utmn.ru/sveden/files/zij/80664_SHKN_UP_09.03.03_Prikladnaya_informatika_RISB_2025_OFO(1).pdf",
+                "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ": "https://sveden.utmn.ru/sveden/files/vib/80669_SHKN_UP_10.03.01_Informacionnaya_bezopasnosty_2025_OFO(1).pdf",
+                "ТЕХНИЧЕСКАЯ ФИЗИКА": "https://sveden.utmn.ru/sveden/files/rik/81101_SHEN_UP_16.03.01_Texnicheskaya_fizika_2025_OFO.pdf",
+                "БИОИНЖЕНЕРИЯ И БИОИНФОРМАТИКА": "https://sveden.utmn.ru/sveden/files/aij/81118_SHEN_UP_06.05.01_Molekulyarnaya_i_kletochnaya_bioingheneriya_2025_OFO.pdf"
+            },
+            "ТИУ": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "https://www.tyuiu.ru/sveden/files/riy/01.03.02_Prikladnaya_matematika_i_informatika_(PKTb)_OFO_nabor_2023(1).pdf",
+                "СТРОИТЕЛЬСТВО": "https://www.tyuiu.ru/sveden/files/ait/08.03.01_Stroitelystvo_(PGSb)_OFO_nabor_2023(2).pdf",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://www.tyuiu.ru/sveden/files/rih/09.03.01_Informatika_i_vychislitelynaya_texnika_(ASOiUb)_OFO_nabor_2023(1).pdf",
+                "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://www.tyuiu.ru/sveden/files/aig/09.03.02_Informacionnye_sistemy_i_texnologii_(IIPb)_OFO_nabor_2023(2).pdf",
+                "ПРИБОРОСТРОЕНИЕ": "https://www.tyuiu.ru/sveden/files/zia/12.03.01_Priborostroenie_(PMKb)_OFO_nabor_2023(2).pdf",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://www.tyuiu.ru/sveden/files/vis/12.03.04_Biotexnicheskie_sistemy_i_texnologii_(BASb)_OFO_nabor_2023(2).pdf",
+                "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА": "https://www.tyuiu.ru/sveden/files/aiq/13.03.01_Teploenergetika_i_teplotexnika_(PTb)_OFO_nabor_2023(2).pdf",
+                "ЭЛЕКТРОЭнЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА": "https://www.tyuiu.ru/sveden/files/vis/13.03.02_Elektroenergetika_i_elektrotexnika_(ESb)_OFO_nabor_2023(2).pdf",
+                "МАШИНОСТРОЕНИЕ": "https://www.tyuiu.ru/sveden/files/eiz/15.03.01_Mashinostroenie_(SAPb)_OFO_nabor_2023(2).pdf",
+                "ПРИКЛАДНАЯ МЕХАНИКА": "https://www.tyuiu.ru/sveden/files/eir/15.03.03_Prikladnaya_mexanika_(MMSb)_OFO_nabor_2024(1).pdf",
+                "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ": "https://www.tyuiu.ru/sveden/files/ais/18.03.01_Ximicheskaya_texnologiya_(XTb)_OFO_nabor_2023(2).pdf",
+                "НЕФТЕГАЗОВОЕ ДЕЛО": "https://www.tyuiu.ru/sveden/files/vii/21.03.01_Neftegazovoe_delo_(EDNb)_OFO_nabor_2025.pdf",
+                "СТРОИТЕЛЬСТВО УНИКАЛЬНЫХ ЗДАНИЙ И СООРУЖЕНИЙ": "https://www.tyuiu.ru/sveden/files/rin/08.05.01_Stroitelystvo_unikalynyx_zdanii_i_soorughenii_(SUZ)_OFO_nabor_2023(2).pdf",
+                "НЕФТЕГАЗОВЫЕ ТЕХНИКА И ТЕХНОЛОГИИ": "https://www.tyuiu.ru/sveden/files/eig/21.05.06_Neftegazovye_texnika_i_texnologii_(MTX)_OFO_nabor_2023(1).pdf"
+            },
+            "МАИ": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_01.03.02.БВ1_МАИ_806.pdf",
+                "ФУНДАМЕНТАЛЬНАЯ ИНФОРМАТИКА И ИНФОРМАЦИОННЫЕ ТЕХНОЛОГИИ": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_02.03.02.БВ1_МАИ_806.pdf",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_09.03.01.БВ6_м.%20Молодёжная_316.pdf",
+                "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_09.03.02.БВ1_МАИ_307.pdf",
+                "ПРИКЛАДНАя ИНФОРМАТИКА": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_09.03.03.БВ1_МАИ_311.pdf",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_12.03.04.БВ7_м.%20Молодёжная_1102.pdf",
+                "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_10.03.01.БВ1_МАИ_402.pdf",
+                "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_13.03.01.БВ1_МАИ_204.pdf",
+                "МЕТАЛЛУРГИЯ": "https://files.mai.ru/site/sveden/oop3/EP_О_2022-23_22.03.02.Б7_м.%20Молодёжная_1101.pdf",
+                "АВИАСТРОЕНИЕ": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_24.03.04.ББ1_МАИ_1401.pdf",
+                "ТЕХНИЧЕСКАЯ ЭКСПЛУАТАЦИЯ ЛЕТАТЕЛЬНЫХ АППАРАТОВ И ДВИГАТЕЛЕЙ": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_25.03.01.БВ4_МАИ_101.pdf",
+                "УПРАВЛЕНИЕ В ТЕХНИЧЕСКИХ СИСТЕМАХ": "https://files.mai.ru/site/sveden/oop3/EP_О_2024-25_27.03.04.БВ2_МАИ_301.pdf"
+            },
+            "МЭИ": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИВТИ-01.03.02-МиПОВМиКС-474-2023_СУОС%203++/Планы/01.03.02_МиПОВМиКС_8613_ИВТИ_О_2025_СУОС%203++-09.01.2025.pdf",
+                "ФУНДАМЕНТАЛЬНАЯ ИНФОРМАТИКА И ИНФОРМАЦИОННЫЕ ТЕХНОЛОГИИ": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИВТИ-02.03.02-ИТиСИИ-370-2024_ФГОС%203++/Планы/02.03.02_ИТиСИИ_8401_ИВТИ_О_2025_ФГОС%203++-23.12.2024.pdf",
+                "СТРОИТЕЛЬСТВО": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИГВИЭ-08.03.01-ПГиЭС-431-2023_СУОС%203++/Планы/08.03.01_ПГиЭС_8682_ИГВИЭ_О_2025_СУОС%203++-09.01.2025.pdf",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИВТИ-09.03.01-ВИС-550-2023_СУОС%203++/Планы/09.03.01_ВИС_7644_ИВТИ_О_2025_СУОС%203++-23.12.2024.pdf",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИДДО-09.03.03_13.03.01-ИТвТ-610-2025_СУОС%203++_СУОС%203++/Планы/09.03.03_ИТвТ_6539_ИДДО_З_2025_СУОС%203++_СУОС%203++-16.01.2025.pdf",
+                "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИнЭИ-10.03.01-БАС-438-2023_СУОС%203++/Планы/10.03.01_БАС_6493_ИнЭИ_О_2025_СУОС%203++-06.12.2024.pdf",
+                "РАДИОТЕХНИКА": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИДДО-11.03.01-БТиИВ-420-2023_СУОС%203++/Планы/11.03.01_БТиИВ_9007_ИДДО_З_2025_СУОС%203++-16.01.2025.pdf",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИРЭ-12.03.04-БМАС-552-2023_СУОС%203++/Планы/12.03.04_БМАС_8700_ИРЭ_О_2025_СУОС%203++-23.12.2024.pdf",
+                "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИТАЭ-13.03.01-АТПвТЭ-570-2023_СУОС%203++/Планы/13.03.01_АТПвТЭ_8662_ИТАЭ_О_2025_СУОС%203++-09.01.2025.pdf",
+                "ЭНЕРГЕТИЧЕСКОЕ МАШИНОСТРОЕНИЕ": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИГВИЭ-13.03.03-АГиПСА-463-2023_СУОС%203++/Планы/13.03.03_АГиПСА_8712_ИГВИЭ_О_2025_СУОС%203++-23.12.2024.pdf",
+                "ЯДЕРНАЯ ЭНЕРГЕТИКА И ТЕПЛОФИЗИКА": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИТАЭ-14.03.01-АЭСиУ-484-2023_СУОС%203++/Планы/14.03.01_АЭСиУ_8657_ИТАЭ_О_2025_СУОС%203++-09.01.2025.pdf",
+                "МАШИНОСТРОЕНИЕ": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ЭнМИ-15.03.01-МиТВЭПОМ-530-2023_СУОС%203++/Планы/15.03.01_МиТВЭПОМ_8902_ЭнМИ_О_2025_СУОС%203++-16.01.2025.pdf",
+                "ПРИКЛАДНАЯ МЕХАНИКА": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ЭнМИ-15.03.03-ДПМ-501-2023_СУОС%203++/Планы/15.03.03_ДПМ_8853_ЭнМИ_О_2025_СУОС%203++-09.01.2025.pdf",
+                "БИЗНЕС-ИНФОРМАТИКА": "https://files.mpei.ru/opop/ОПОП%20ВО/ОПОП-ИнЭИ-38.03.05-ИиПОБП-434-2023_СУОС%203++/Планы/38.03.05_ИиПОБП_6505_ИнЭИ_О_2025_СУОС%203++-06.12.2024.pdf"
+            },
+            "МГТУ им. Баумана": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "http://195.19.40.226/uchplan/plan/УП/01.03.02.01%20ИУ9.pdf",
+                "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ": "http://195.19.40.226/uchplan/plan/УП/01.03.03.02%20ФН3.pdf",
+                "ПРИКЛАДНАЯ МАТЕМАТИКА": "http://195.19.40.226/uchplan/plan/УП/01.03.04.03%20ФН1.pdf",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "http://195.19.40.226/uchplan/plan/УП/09.03.01.05%20ИУ6.pdf",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "http://195.19.40.226/uchplan/plan/УП/09.03.03.02%20ИУ6.pdf",
+                "ПРОГРАММНАЯ ИНЖЕНЕРИЯ": "http://195.19.40.226/uchplan/plan/УП/09.03.04.01%20ИУ7.pdf",
+                "КОНСТРУИРОВАНИЕ И ТЕХНОЛОГИЯ ЭЛЕКТРОННЫХ СРЕДСТВ": "http://195.19.40.226/uchplan/plan/УП/11.03.03.01%20ИУ4.pdf",
+                "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА": "http://195.19.40.226/uchplan/plan/УП/11.03.04.01%20МТ11.pdf",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "http://195.19.40.226/uchplan/plan/УП/12.03.04.02%20БМТ2.pdf",
+                "ЭНЕРГЕТИЧЕСКОЕ МАШИНОСТРОЕНИЕ": "http://195.19.40.226/uchplan/plan/УП/13.03.03.01%20Э2.pdf",
+                "ПРИКЛАДНАЯ МЕХАНИКА": "http://195.19.40.226/uchplan/plan/УП/15.03.03.01%20РК5.pdf",
+                "БИЗНЕС-ИНФОРМАТИКА": "http://195.19.40.226/uchplan/plan/УП/38.03.05.01%20ИБМ6.pdf"
+            },
+            "РГУ Нефти и газа (Губкин)": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/231300_2013.xls",
+                "ПРИБОРОСТРОЕНИЕ": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/200100__2013.xls",
+                "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/140400_2013.xls",
+                "МАШИНОСТРОЕНИЕ": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/150700_(MI)_2013.xls",
+                "ТЕХНОЛОГИЧЕСКИЕ МАШИНЫ И ОБОРУДОВАНИЕ": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/151000_МА__2013.xls",
+                "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/240100_XO_2013.xls",
+                "ЭНЕРГО- И РЕСУРСОСБЕРЕГАЮЩИЕ ПРОЦЕССЫ В ХИМИЧЕСКОЙ ТЕХНОЛОГИИ, НЕФТЕХИМИИ И БИОТЕХНОЛОГИИ": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/241000_XE_2013.xls",
+                "НЕФТЕГАЗОВОЕ ДЕЛО": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/131000_RB_2013.xls",
+                "ТЕХНОСФЕРНАЯ БЕЗОПАСНОСТЬ": "https://gubkin.ru/departaments/educational_activities/umu/work%20plans%20fgos/280700_MB_%202013.xls"
+            },
+            "ИТМО": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "ФИЗИКА": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "ПРОГРАММНАЯ ИНЖЕНЕРИЯ": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "ПРИБОРОСТРОЕНИЕ": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "БИОТЕХНОЛОГИЯ": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340",
+                "БИЗНЕС-ИНФОРМАТИКА": "https://abit.itmo.ru/programs/bachelor?ysclid=miencytg94347830340"
+            },
+            "СПбПУ": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "https://www.spbstu.ru/edu/plans/01.03.02_02/2025-2026/2025/ucheb_plan_01.03.02_02_o_2025.zip?t=1764080379",
+                "МАТЕМАТИКА И КОМПЬЮТЕРНЫЕ НАУКИ": "https://www.spbstu.ru/edu/plans/02.03.01_01/2025-2026/2025/ucheb_plan_02.03.01_01_o_2025.zip?t=1764080379",
+                "ПРИКЛАДНЫЕ МАТЕМАТИКА И ФИЗИка": "https://www.spbstu.ru/edu/plans/03.03.01_01/2025-2026/2025/ucheb_plan_03.03.01_01_o_2025.zip?t=1764080379",
+                "ФИЗИКА": "https://www.spbstu.ru/edu/plans/03.03.02_05/2025-2026/2025/ucheb_plan_03.03.02_05_o_2025.zip?t=1764080379",
+                "СТРОИТЕЛЬСТВО": "https://www.spbstu.ru/edu/plans/08.03.01_04/2025-2026/2025/ucheb_plan_08.03.01_04_o_2025.zip?t=1764080379",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://www.spbstu.ru/edu/plans/09.03.01_02/2025-2026/2025/ucheb_plan_09.03.01_02_o_2025.zip?t=1764080379",
+                "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://www.spbstu.ru/edu/plans/09.03.02_02/2025-2026/2025/ucheb_plan_09.03.02_02_o_2025.zip?t=1764080379",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "https://www.spbstu.ru/edu/plans/09.03.03_03/2025-2026/2025/ucheb_plan_09.03.03_03_o_2025.zip?t=1764080379",
+                "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ": "https://www.spbstu.ru/edu/plans/10.03.01_05/2025-2026/2025/ucheb_plan_10.03.01_05_o_2025.zip?t=1764080379",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://www.spbstu.ru/edu/plans/12.03.04_02/2025-2026/2025/ucheb_plan_12.03.04_02_o_2025.zip?t=1764080379",
+                "МАШИНОСТРОЕНИЕ": "https://www.spbstu.ru/edu/plans/15.03.01_06/2025-2026/2025/ucheb_plan_15.03.01_06_o_2025.zip?t=1764080379",
+                "ПРИКЛАДНАЯ МЕХАНИКА": "https://www.spbstu.ru/edu/plans/15.03.03_04/2025-2026/2025/ucheb_plan_15.03.03_04_o_2025.zip?t=1764080379",
+                "БИОТЕХНОЛОГИЯ": "https://www.spbstu.ru/edu/plans/19.03.01_03/2025-2026/2025/ucheb_plan_19.03.01_03_o_2025.zip?t=1764080379",
+                "МЕТАЛЛУРГИЯ": "https://www.spbstu.ru/edu/plans/22.03.02_15/2025-2026/2025/ucheb_plan_22.03.02_15_o_2025.zip?t=1764080379"
+            },
+            "ЛЭТИ": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИка": "https://etu.ru/sveden/files/eid/3PP_Ucheb_plan_010302_AM_305-25.pdf",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://etu.ru/sveden/files/vij/3PP_Ucheb_plan_090301_VT_3341-25.pdf",
+                "ПРОГРАММНАЯ ИНЖЕНЕРИЯ": "https://etu.ru/sveden/files/riy/3PP_Ucheb_plan_090304_MOEVM_332-25.pdf",
+                "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА": "https://etu.ru/sveden/files/zim/3PP_Ucheb_plan_110304_EPU_3205-25.pdf",
+                "ПРИБОРОСТРОЕНИЕ": "https://etu.ru/sveden/files/rit/3PP_Ucheb_plan_120301_LINS_3551r-25.pdf",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://etu.ru/sveden/files/riw/3PP_Ucheb_plan_120304_BTS_351-25.pdf",
+                "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА": "https://etu.ru/sveden/files/air/3PP_Ucheb_plan_130302_ETPT_141-25.pdf",
+                "КОМПЬЮТЕРНАЯ БЕЗОПАСНОСТЬ": "https://etu.ru/sveden/files/eik/3PP_Ucheb_plan_100501_IB_833-25.pdf"
+            },
+            "НГТУ": {
+                "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "https://ciu.nstu.ru/documents_pub/download?id=280476",
+                "ФИЗИКА": "https://ciu.nstu.ru/documents_pub/download?id=272134",
+                "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "https://ciu.nstu.ru/documents_pub/download?id=277590",
+                "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://ciu.nstu.ru/documents_pub/download?id=279810",
+                "ПРИКЛАДНАЯ ИНФОРМАТИКА": "https://ciu.nstu.ru/documents_pub/download?id=280652",
+                "ПРОГРАММНАЯ ИНЖЕНЕРИЯ": "https://ciu.nstu.ru/documents_pub/download?id=280644",
+                "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ": "https://ciu.nstu.ru/documents_pub/download?id=280180",
+                "РАДИОТЕХНИКА": "https://ciu.nstu.ru/documents_pub/download?id=277542",
+                "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА": "https://ciu.nstu.ru/documents_pub/download?id=280456",
+                "ПРИБОРОСТРОЕНИЕ": "https://ciu.nstu.ru/documents_pub/download?id=277570",
+                "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://ciu.nstu.ru/documents_pub/download?id=279690",
+                "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА": "https://ciu.nstu.ru/documents_pub/download?id=271550",
+                "ЭЛЕКТРОЭнЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА": "https://ciu.nstu.ru/documents_pub/download?id=281552",
+                "ПРИКЛАДНАЯ МЕХАНИКА": "https://ciu.nstu.ru/documents_pub/download?id=280091",
+                "ТЕХНИЧЕСКАЯ ФИЗИка": "https://ciu.nstu.ru/documents_pub/download?id=277354",
+                "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ": "https://ciu.nstu.ru/documents_pub/download?id=280584",
+                "АВИАСТРОЕНИЕ": "https://ciu.nstu.ru/documents_pub/download?id=280420",
+                "НАНОИНЖЕНЕРИЯ": "https://ciu.nstu.ru/documents_pub/download?id=280660",
+                "БИЗНЕС-ИНФОРМАТИКА": "https://ciu.nstu.ru/documents_pub/download?id=277558"
+            },
+            "СГУГиТ": {
+                "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "https://sgugit.ru/sveden/files/auf/09.03.02_ISiT_ISiT_UP_O25.pdf",
+                "ИНФОРМАЦИОННАя БЕЗОПАСНОСТЬ": "https://sgugit.ru/sveden/files/zid/10.03.01_IB_OiTZI_UP_O25.pdf",
+                "ПРИБОРОСТРОЕНИЕ": "https://sgugit.ru/sveden/files/vij/12.03.01_Priborostroenie_TP_UP_O25.pdf",
+                "ТЕХНОСФЕРНАЯ БЕЗОПАСНОСТЬ": "https://sgugit.ru/sveden/files/rij/20.03.01_TB_UP_O25.pdf",
+                "ГЕОДЕЗИЯ И ДИСТАНЦИОННОЕ ЗОНДИРОВАНИЕ": "https://sgugit.ru/sveden/files/zir/21.03.03_GiDZ_G_UP_O25.pdf",
+                "ИННОВАТИКА": "https://sgugit.ru/sveden/files/ril/27.03.05_Innovatika_UI_UP_O25.pdf",
+                "БОЕПРИПАСЫ И ВЗРЫВАТЕЛИ": "https://sgugit.ru/sveden/files/ziy/17.05.01_BiV_UP_O25.pdf",
+                "ПРИКЛАДНАЯ ГЕОДЕЗИЯ": "https://sgugit.ru/sveden/files/eip/21.02.08_pg_11_2022.pdf",
+                "ГОРНОЕ ДЕЛО": "https://sgugit.ru/sveden/files/21.05.04_UP_GD_OGR_Z23.pdf"
+            }
+        };
+
+        // Описания специальностей (общие для всех вузов)
+        const specialtyDescriptions = {
+            "ПРИКЛАДНАЯ МАТЕМАТИКА": "Специальность на стыке математики и компьютерных наук. Студенты учатся решать сложные задачи с помощью математического моделирования, работать с большими данными и разрабатывать алгоритмы для различных отраслей промышленности и науки.",
+            "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА": "Подготовка специалистов в области компьютерных систем, архитектуры ЭВМ, разработки программного и аппаратного обеспечения. Идеально для будущих системных архитекторов и инженеров-программистов.",
+            "ПРИКЛАДНАЯ ИНФОРМАТИКА": "Создание и внедрение информационных систем в бизнесе и управлении. Выпускники работают IT-аналитиками, системными администраторами и разработчиками корпоративных систем.",
+            "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА": "Разработка и производство электронных компонентов, микрочипов и наноустройств. Перспективное направление для работы в высокотехнологичных отраслях.",
+            "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА": "Проектирование и эксплуатация тепловых электростанций, систем теплоснабжения и энергосберегающих технологий. Ключевая специальность для энергетической отрасли.",
+            "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА": "Проектирование, монтаж и обслуживание систем электроснабжения, электрических сетей и электрооборудования. Востребована в энергетических компаниях.",
+            "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ": "Разработка и совершенствование химических производств, создание новых материалов и технологий. Подготовка для нефтехимической промышленности.",
+            "ЭНЕРГЕТИЧЕСКОЕ МАШИНОСТРОЕНИЕ": "Проектирование и производство энергетического оборудования: турбин, котлов, двигателей для электростанций и промышленных предприятий.",
+            "МАТЕМАТИКА": "Фундаментальное математическое образование с углубленным изучением алгебры, анализа, геометрии. Подготовка к научной работе и преподавательской деятельности в вузах.",
+            "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА": "Комбинированная программа, сочетающая глубокие математические знания с практическими навыками программирования и анализа данных.",
+            "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ": "Создание математических моделей механических систем, расчет прочности, динамики и устойчивости сложных технических объектов.",
+            "МАТЕМАТИКА И КОМПЬЮТЕРНЫЕ НАУКИ": "Изучение алгоритмов, структур данных и вычислительных методов. Подготовка специалистов для IT-индустрии и научных исследований.",
+            "ФИЗИКА": "Изучение фундаментальных законов природы, экспериментальная физика, теоретические основы. Подготовка физиков-исследователей для научных центров и высокотехнологичных предприятий.",
+            "РАДИОФИЗИКА": "Исследование электромагнитных волн, разработка радиоэлектронных систем и устройств. Работа в телекоммуникациях, радиолокации и IT.",
+            "БИОТЕХНОЛОГИЯ": "Использование биологических систем для создания новых продуктов и технологий. Перспективное направление в медицине, фармацевтике и пищевой промышленности.",
+            "НЕФТЕГАЗОВОЕ ДЕЛО": "Разведка, добыча, транспортировка и переработка нефти и газа. Ключевая специальность для топливно-энергетического комплекса.",
+            "БИЗНЕС-ИНФОРМАТИКА": "Управление IT-проектами в бизнесе, анализ бизнес-процессов, внедрение информационных систем. Подготовка IT-менеджеров.",
+            "МАТЕМАТИЧЕСКОЕ ОБЕСПЕЧЕНИЕ И АДМИНИСТРИРОВАНИЕ ИНФОРМАЦИОННЫХ СИСТЕМ": "Разработка программного обеспечения, администрирование информационных систем, обеспечение их безопасности и эффективной работы.",
+            "СТРОИТЕЛЬСТВО": "Проектирование, строительство и эксплуатация зданий и сооружений. Подготовка инженеров-строителей для различных отраслей.",
+            "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ": "Защита информации в компьютерных системах, криптография, обеспечение безопасности сетей и данных. Востребованная специальность в условиях цифровизации экономики.",
+            "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "Разработка медицинской техники, биомедицинских систем и технологий. Интердисциплинарная специальность на стыке медицины и инженерии.",
+            "ФУНДАМЕНТАЛЬНАЯ ИНФОРМАТИКА И ИНФОРМАЦИОННЫЕ ТЕХНОЛОГИИ": "Изучение теоретических основ информатики, разработка новых информационных технологий и вычислительных методов.",
+            "РАДИОТЕХНИКА": "Разработка и проектирование радиоэлектронных устройств и систем. Подготовка для телекоммуникационной и радиопромышленности.",
+            "ЯДЕРНАЯ ЭНЕРГЕТИКА И ТЕПЛОФИЗИКА": "Исследование и разработка ядерных энергетических установок, решение задач теплофизики. Работа на атомных электростанциях и в научных центрах.",
+            "МАШИНОСТРОЕНИЕ": "Проектирование, производство и эксплуатация машин и механизмов. Базовая специальность для промышленности.",
+            "ПРИКЛАДНАЯ МЕХАНИКА": "Исследование механических систем, расчет прочности и надежности конструкций. Применение в авиационной, автомобильной и других отраслях.",
+            "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ": "Разработка и внедрение корпоративных информационных систем, управление IT-инфраструктурой предприятий.",
+            "ПРОГРАММНАЯ ИНЖЕНЕРИЯ": "Разработка сложного программного обеспечения, управление IT-проектами, обеспечение качества ПО. Элитная специальность для будущих IT-архитекторов.",
+            "КОНСТРУИРОВАНИЕ И ТЕХНОЛОГИЯ ЭЛЕКТРОННЫХ СРЕДСТВ": "Проектирование и производство электронной аппаратуры, разработка технологических процессов в электронной промышленности.",
+            "ПРИБОРОСТРОЕНИЕ": "Создание измерительных, контрольных и управляющих приборов и систем. Важная специальность для автоматизации производств.",
+            "ТЕХНОЛОГИЧЕСКИЕ МАШИНЫ И ОБОРУДОВАНИЕ": "Проектирование и эксплуатация технологического оборудования для различных отраслей промышленности.",
+            "ЭНЕРГО- И РЕСУРСОСБЕРЕГАЮЩИЕ ПРОЦЕССЫ В ХИМИЧЕСКОЙ ТЕХНОЛОГИИ, НЕФТЕХИМИИ И БИОТЕХНОЛОГИИ": "Разработка энергоэффективных и экологичных технологий в химической и нефтехимической промышленности.",
+            "ТЕХНОСФЕРНАЯ БЕЗОПАСНОСТЬ": "Обеспечение безопасности производственных процессов, защита окружающей среды, промышленная экология.",
+            "ТЕХНИЧЕСКАЯ ФИЗИКА": "Применение физических принципов для решения инженерных задач, разработка новых технологий и материалов.",
+            "БИОИНЖЕНЕРИЯ И БИОИНФОРМАТИКА": "Использование инженерных подходов в биологии и медицине, анализ биологических данных с помощью computational методов.",
+            "МЕТАЛЛУРГИЯ": "Производство и обработка металлов, разработка новых металлических материалов и сплавов.",
+            "АВИАСТРОЕНИЕ": "Проектирование, производство и эксплуатация летательных аппаратов. Элитная специальность для аэрокосмической отрасли.",
+            "ТЕХНИЧЕСКАЯ ЭКСПЛУАТАЦИЯ ЛЕТАТЕЛЬНЫХ АППАРАТОВ И ДВИГАТЕЛЕЙ": "Обслуживание и ремонт авиационной техники, обеспечение безопасности полетов.",
+            "УПРАВЛЕНИЕ В ТЕХНИЧЕСКИХ СИСТЕМАХ": "Разработка систем автоматического управления для промышленных предприятий и технических комплексов.",
+            "ХИМИЯ, ФИЗИКА И МЕХАНИКА МАТЕРИАЛОВ": "Исследование и разработка новых материалов с заданными свойствами, изучение их структуры и поведения.",
+            "ЯДЕРНЫЕ ФИЗИКА И ТЕХНОЛОГИИ": "Исследование ядерных процессов, разработка ядерных технологий для энергетики, медицины и науки.",
+            "ПОДВИЖНОЙ СОСТАВ ЖЕЛЕЗНЫХ ДОРОГ": "Проектирование, производство и обслуживание железнодорожного подвижного состава.",
+            "ЭКСПЛУАТАЦИЯ ЖЕЛЕЗНЫХ ДОРОГ": "Организация работы железнодорожного транспорта, управление перевозочным процессом.",
+            "СИСТЕМЫ ОБЕСПЕЧЕНИЯ ДВИЖЕНИЯ ПОЕЗДОВ": "Разработка и обслуживание систем управления движением поездов, обеспечение безопасности железнодорожного транспорта.",
+            "СТРОИТЕЛЬСТВО ЖЕЛЕЗНЫХ ДОРОГ, МОСТОВ И ТРАНСПОРТНЫХ ТОННЕЛЕЙ": "Проектирование и строительство железнодорожной инфраструктуры, искусственных сооружений.",
+            "КОМПЬЮТЕРНАЯ БЕЗОПАСНОСТЬ": "Защита компьютерных систем от кибератак, обеспечение конфиденциальности и целостности данных.",
+            "ПРИКЛАДНЫЕ МАТЕМАТИКА И ФИЗИКА": "Комбинированная программа, сочетающая фундаментальные знания по математике и физике с их практическим применением.",
+            "НАНОИНЖЕНЕРИЯ": "Разработка и создание материалов, устройств и систем на наноуровне. Перспективное направление в материаловедении, электронике и биомедицине.",
+            "ГЕОДЕЗИЯ И ДИСТАНЦИОННОЕ ЗОНДИРОВАНИЕ": "Изучение формы и размеров Земли, создание карт, использование спутниковых технологий для мониторинга земной поверхности.",
+            "ИННОВАТИКА": "Управление инновационными процессами, разработка и внедрение новых технологий и продуктов в различных отраслях экономики.",
+            "БОЕПРИПАСЫ И ВЗРЫВАТЕЛИ": "Проектирование, производство и испытание боеприпасов, взрывных устройств и систем вооружения. Специализация для оборонной промышленности.",
+            "ПРИКЛАДНАЯ ГЕОДЕЗИЯ": "Практическое применение геодезических методов в строительстве, картографии, кадастре и горном деле.",
+            "ГОРНОЕ ДЕЛО": "Разведка, добыча и переработка полезных ископаемых, проектирование горных предприятий и обеспечение безопасности горных работ.",
+            "СТРОИТЕЛЬСТВО УНИКАЛЬНЫХ ЗДАНИЙ И СООРУЖЕНИЙ": "Проектирование и возведение сложных инженерных объектов: небоскребов, мостов, тоннелей, стадионов и других уникальных сооружений.",
+            "НЕФТЕГАЗОВЫЕ ТЕХНИКА И ТЕХНОЛОГИИ": "Разработка и внедрение современных технологий и оборудования для нефтегазовой отрасли, оптимизация процессов добычи и переработки."
+        };
+
+        // Полные данные о вузах и специальностях
+        const universitiesData = {
+            "КАЗАНЬ": {
+                "КГЭУ": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА", score: 222, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 226, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 230, subjects: "р м и/ф" },
+                    { name: "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА", score: 193, subjects: "р м и/х/ф" },
+                    { name: "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА", score: 180, subjects: "р м и/х/ф" },
+                    { name: "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА", score: 191, subjects: "р м и/х/ф" },
+                    { name: "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ", score: 172, subjects: "р х м/и/ф" },
+                    { name: "ЭНЕРГЕТИЧЕСКОЕ МАШИНОСТРОЕНИЕ", score: 186, subjects: "р м и/х/ф" }
+                ],
+                "КФУ": [
+                    { name: "МАТЕМАТИКА", score: 208, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 247, subjects: "р м и/ф" },
+                    { name: "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ", score: 199, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА", score: 227, subjects: "р м и/ф" },
+                    { name: "МАТЕМАТИКА И КОМПЬЮТЕРНЫЕ НАУКИ", score: 205, subjects: "р м и/ф" },
+                    { name: "ФИЗИКА", score: 167, subjects: "р ф м/и" },
+                    { name: "РАДИОФИЗИКА", score: 162, subjects: "р ф м/и" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 257, subjects: "р м и/ф" },
+                    { name: "БИОТЕХНОЛОГИЯ", score: 237, subjects: "р б и/х/ф" },
+                    { name: "НЕФТЕГАЗОВОЕ ДЕЛО", score: 221, subjects: "р м и/ф/х" },
+                    { name: "БИЗНЕС-ИНФОРМАТИКА", score: 263, subjects: "р м о/и/ист" }
+                ],
+                "КНИТУ": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 236, subjects: "р м и/ф" },
+                    { name: "МАТЕМАТИЧЕСКОЕ ОБЕСПЕЧЕНИЕ И АДМИНИСТРИРОВАНИЕ ИНФОРМАЦИОННЫХ СИСТЕМ", score: 217, subjects: "р м и/ф" },
+                    { name: "СТРОИТЕЛЬСТВО", score: 200, subjects: "р м и/ф/х" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 214, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ", score: 163, subjects: "р м и/ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 187, subjects: "р м и/б/х/ф" },
+                    { name: "ТЕПЛОЭнЕРГЕТИКА И ТЕПЛОТЕХНИКА", score: 182, subjects: "р м и/х/ф" },
+                    { name: "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА", score: 185, subjects: "р м и/ф" },
+                    { name: "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ", score: 171, subjects: "р х м/и/ф" },
+                    { name: "БИОТЕХНОЛОГИЯ", score: 197, subjects: "р м б/х" },
+                    { name: "НЕФТЕГАЗОВОЕ ДЕЛО", score: 224, subjects: "р м и/г/х/ф" }
+                ]
+            },
+            "ТЮМЕНЬ": {
+                "ТюмГУ": [
+                    { name: "МАТЕМАТИКА", score: 207, subjects: "р м и/ф" },
+                    { name: "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ", score: 184, subjects: "р м и/х" },
+                    { name: "ФИЗИКА", score: 180, subjects: "р ф и/м/х" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 224, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ", score: 230, subjects: "р м и/ф" },
+                    { name: "ТЕХНИЧЕСКАя ФИЗИКА", score: 208, subjects: "р м и/х/ф" },
+                    { name: "БИОИНЖЕНЕРИЯ И БИОИНФОРМАТИКА", score: 228, subjects: "р м и/б/х/ф" }
+                ],
+                "ТИУ": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 238, subjects: "р м и/ф" },
+                    { name: "СТРОИТЕЛЬСТВО", score: 174, subjects: "р м и/х/ф" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 210, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 231, subjects: "р м и/ф" },
+                    { name: "ПРИБОРОСТРОЕНИЕ", score: 177, subjects: "р м и/х/ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 176, subjects: "р м и/х/ф" },
+                    { name: "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА", score: 181, subjects: "р м и/х/ф" },
+                    { name: "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА", score: 206, subjects: "р м и/х/ф" },
+                    { name: "МАШИНОСТРОЕНИЕ", score: 189, subjects: "р м и х/ф" },
+                    { name: "ПРИКЛАДНАЯя МЕХАНИКА", score: 168, subjects: "р м и/х/ф" },
+                    { name: "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ", score: 137, subjects: "р м и/ф" },
+                    { name: "НЕФТЕГАЗОВОЕ ДЕЛО", score: 225, subjects: "р м и/х/ф" },
+                    { name: "СТРОИТЕЛЬСТВО УНИКАЛЬНЫХ ЗДАНИЙ И СООРУЖЕНИЙ", score: 235, subjects: "р м и/х/ф" },
+                    { name: "НЕФТЕГАЗОВЫЕ ТЕХНИКА И ТЕХНОЛОГИИ", score: 203, subjects: "р м и/х/ф" }
+                ]
+            },
+            "МОСКВА": {
+                "МЭИ": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 256, subjects: "р м ф" },
+                    { name: "ФУНДАМЕНТАЛЬНАЯ ИНФОРМАТИКА И ИНФОРМАЦИОННЫЕ ТЕХНОЛОГИИ", score: 271, subjects: "р м ф/и" },
+                    { name: "СТРОИТЕЛЬСТВО", score: 234, subjects: "р м ф/и" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 253, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 261, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ", score: 261, subjects: "р м и/ф" },
+                    { name: "РАДИОТЕХНИКА", score: 216, subjects: "р м и/ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 218, subjects: "р м и/ф/х" },
+                    { name: "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА", score: 233, subjects: "р м и/ф" },
+                    { name: "ЭНЕРГЕТИЧЕСКОЕ МАШИНОСТРОЕНИЕ", score: 216, subjects: "р м и/ф" },
+                    { name: "ЯДЕРНАЯ ЭНЕРГЕТИКА И ТЕПЛОФИЗИКА", score: 239, subjects: "р м и/ф" },
+                    { name: "МАШИНОСТРОЕНИЕ", score: 219, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ МЕХАНИКА", score: 219, subjects: "р м и/ф" },
+                    { name: "БИЗНЕС-ИНФОРМАТИКА", score: 270, subjects: "р м и/о" }
+                ],
+                "МАИ": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 275, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА", score: 262, subjects: "р м и/ф" },
+                    { name: "ФУНДАМЕНТАЛЬНАЯ ИНФОРМАТИКА И ИНФОРМАЦИОННЫЕ ТЕХНОЛОГИИ", score: 269, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 253, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 256, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 263, subjects: "р м и/ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 217, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ", score: "ПЛАТО", subjects: "р м и/ф" },
+                    { name: "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА", score: 208, subjects: "р м и/ф" },
+                    { name: "МЕТАЛЛУРГИЯ", score: 205, subjects: "р м и/ф" },
+                    { name: "АВИАСТРОЕНИЕ", score: 227, subjects: "р м и/ф" },
+                    { name: "ТЕХНИЧЕСКАЯ ЭКСПЛУАТАЦИЯ ЛЕТАТЕЛЬНЫХ АППАРАТОВ И ДВИГАТЕЛЕЙ", score: 223, subjects: "р м и/ф" },
+                    { name: "УПРАВЛЕНИЕ В ТЕХНИЧЕСКИХ СИСТЕМАХ", score: 240, subjects: "р м и/ф" }
+                ],
+                "МГТУ им. Баумана": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 295, subjects: "р м и/ф" },
+                    { name: "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ", score: 271, subjects: "р м ф" },
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА", score: 287, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 262, subjects: "р м ф" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 293, subjects: "р м и/ф" },
+                    { name: "ПРОГРАММНАЯ ИНЖЕНЕРИЯ", score: 302, subjects: "р м и/ф" },
+                    { name: "КОНСТРУИРОВАНИЕ И ТЕХНОЛОГИЯ ЭЛЕКТРОННЫХ СРЕДСТВ", score: 268, subjects: "р м и/ф" },
+                    { name: "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА", score: 273, subjects: "р м ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 287, subjects: "р м б/ф" },
+                    { name: "ЭНЕРГЕТИЧЕСКОЕ МАШИНОСТРОЕНИЕ", score: 243, subjects: "р м ф" },
+                    { name: "ПРИКЛАДНАЯ МЕХАНИКА", score: 269, subjects: "р м ф" },
+                    { name: "БИЗНЕС-ИНФОРМАТИКА", score: 283, subjects: "р м о/и" }
+                ],
+                "РГУ Нефти и газа (Губкин)": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА", score: 241, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ", score: 245, subjects: "р м и/ф" },
+                    { name: "ПРИБОРОСТРОЕНИЕ", score: 229, subjects: "р м и/ф" },
+                    { name: "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА", score: 225, subjects: "р м и/ф" },
+                    { name: "МАШИНОСТРОЕНИЕ", score: 217, subjects: "р м и/ф" },
+                    { name: "ТЕХНОЛОГИЧЕСКИЕ МАШИНЫ И ОБОРУДОВАНИЕ", score: 206, subjects: "р м и/ф" },
+                    { name: "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ", score: 244, subjects: "р м х" },
+                    { name: "ЭНЕРГО- И РЕСУРСОСБЕРЕГАЮЩИЕ ПРОЦЕССЫ В ХИМИЧЕСКОЙ ТЕХНОЛОГИИ, НЕФТЕХИМИИ И БИОТЕХНОЛОГИИ", score: 229, subjects: "р м х" },
+                    { name: "НЕФТЕГАЗОВОЕ ДЕЛО", score: 219, subjects: "р м и/ф" },
+                    { name: "БИЗНЕС-ИНФОРМАТИКА", score: 257, subjects: "р м о/и" },
+                    { name: "ТЕХНОСФЕРНАЯ БЕЗОПАСНОСТЬ", score: 212, subjects: "р м и/ф" }
+                ]
+            },
+            "САНКТ-ПЕТЕРБУРГ": {
+                "ИТМО": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 305, subjects: "р м и" },
+                    { name: "ФИЗИКА", score: 282, subjects: "р м ф" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 282, subjects: "р м и" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 284, subjects: "р м и" },
+                    { name: "ПРОГРАММНАЯ ИНЖЕНЕРИЯ", score: 284, subjects: "р м и" },
+                    { name: "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ", score: 275, subjects: "р м и" },
+                    { name: "ПРИБОРОСТРОЕНИЕ", score: 245, subjects: "р м и" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 256, subjects: "р м б" },
+                    { name: "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ", score: 261, subjects: "р м х" },
+                    { name: "БИОТЕХНОЛОГИЯ", score: 262, subjects: "р м х" },
+                    { name: "БИЗНЕС-ИНФОРМАТИКА", score: 268, subjects: "р м о" }
+                ],
+                "СПбПУ": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 274, subjects: "р м и/ф" },
+                    { name: "МАТЕМАТИКА И КОМПЬЮТЕРНЫЕ НАУКИ", score: 272, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНЫЕ МАТЕМАТИКА И ФИЗИКА", score: 241, subjects: "р м и/ф" },
+                    { name: "ФИЗИКА", score: 226, subjects: "р м ф" },
+                    { name: "СТРОИТЕЛЬСТВО", score: 244, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 270, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 273, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 281, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ", score: 264, subjects: "р м и/ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 253, subjects: "р м б/ф" },
+                    { name: "МАШИНОСТРОЕНИЕ", score: 224, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ МЕХАНИКА", score: 231, subjects: "р м и/ф" },
+                    { name: "БИОТЕХНОЛОГИЯ", score: 256, subjects: "р х м/б" },
+                    { name: "МЕТАЛЛУРГИЯ", score: 197, subjects: "р м х/ф" }
+                ],
+                "ЛЭТИ": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 259, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 245, subjects: "р м и/ф" },
+                    { name: "ПРОГРАММНАЯ ИНЖЕНЕРИЯ", score: 271, subjects: "р м и/ф" },
+                    { name: "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА", score: 207, subjects: "р м и/ф" },
+                    { name: "ПРИБОРОСТРОЕНИЕ", score: 218, subjects: "р и и/ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 231, subjects: "р м и/ф" },
+                    { name: "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА", score: 207, subjects: "р м и/ф" },
+                    { name: "КОМПЬЮТЕРНАЯ БЕЗОПАСНОСТЬ", score: 240, subjects: "р м и/ф" }
+                ]
+            },
+            "ЕКАТЕРИНБУРГ": {
+                "УРФУ": [
+                    { name: "МАТЕМАТИКА", score: 209, subjects: "р м и/ф" },
+                    { name: "МЕХАНИКА И МАТЕМАТИЧЕСКОЕ МОДЕЛИРОВАНИЕ", score: 208, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА", score: 218, subjects: "р м и/ф" },
+                    { name: "МАТЕМАТИКА И КОМПЬЮТЕРНЫЕ НАУКИ", score: 241, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНЫЕ МАТЕМАТИКА И ФИЗИКА", score: 209, subjects: "р м и/ф" },
+                    { name: "ФИЗИКА", score: 172, subjects: "р ф м/и" },
+                    { name: "ХИМИЯ, ФИЗИКА И МЕХАНИКА МАТЕРИАЛОВ", score: 215, subjects: "р х м/и/б/ф" },
+                    { name: "СТРОИТЕЛЬСТВО", score: 185, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 246, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 233, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 246, subjects: "р м и/ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 225, subjects: "р м и/б/ф" },
+                    { name: "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА", score: 184, subjects: "р м и/ф" },
+                    { name: "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА", score: 180, subjects: "р м и/ф" },
+                    { name: "ЯДЕРНЫЕ ФИЗИКА И ТЕХНОЛОГИИ", score: 211, subjects: "р м и/ф" },
+                    { name: "МАШИНОСТРОЕНИЕ", score: 210, subjects: "р м и/х/ф" },
+                    { name: "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ", score: "201", subjects: "р х м/и/ф" },
+                    { name: "БИОТЕХНОЛОГИЯ", score: 213, subjects: "р б м/и/х/ф" },
+                    { name: "МЕТАЛЛУРГИЯ", score: 174, subjects: "р м и/х/ф" },
+                    { name: "БИЗНЕС-ИНФОРМАТИКА", score: 268, subjects: "р м и/и/ист" }
+                ],
+                "УРГУПС": [
+                    { name: "ТЕХНОСФЕРНАЯ БЕЗОПАСНОСТЬ", score: 175, subjects: "р м и/х/ф" },
+                    { name: "ПОДВИЖНОЙ СОСТАВ ЖЕЛЕЗНЫХ ДОРОГ", score: 150, subjects: "р м и/ф" },
+                    { name: "ЭКСПЛУАТАЦИЯ ЖЕЛЕЗНЫХ ДОРОГ", score: 132, subjects: "р м и/ф" },
+                    { name: "СИСТЕМЫ ОБЕСПЕЧЕНИЯ ДВИЖЕНИЯ ПОЕЗДОВ", score: 137, subjects: "р м и/ф" },
+                    { name: "СТРОИТЕЛЬСТВО ЖЕЛЕЗНЫХ ДОРОГ, МОСТОВ И ТРАНСПОРТНЫХ ТОННЕЛЕЙ", score: 147, subjects: "р м и/ф" }
+                ]
+            },
+            "НОВОСИБИРСК": {
+                "НГТУ": [
+                    { name: "ПРИКЛАДНАЯ МАТЕМАТИКА И ИНФОРМАТИКА", score: 228, subjects: "р м и/ф" },
+                    { name: "ФИЗИКА", score: 199, subjects: "р ф м/и" },
+                    { name: "ИНФОРМАТИКА И ВЫЧИСЛИТЕЛЬНАЯ ТЕХНИКА", score: 237, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 246, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ ИНФОРМАТИКА", score: 246, subjects: "р м и/ф" },
+                    { name: "ПРОГРАММНАЯ ИНЖЕНЕРИЯ", score: 266, subjects: "р м и/ф" },
+                    { name: "ИНФОРМАЦИОННАя БЕЗОПАСНОСТЬ", score: 236, subjects: "р м и/ф" },
+                    { name: "РАДИОТЕХНИКА", score: 182, subjects: "р м и/ф" },
+                    { name: "ЭЛЕКТРОНИКА И НАНОЭЛЕКТРОНИКА", score: 176, subjects: "р м и/ф" },
+                    { name: "ПРИБОРОСТРОЕНИЕ", score: 199, subjects: "р м и/ф" },
+                    { name: "БИОТЕХНИЧЕСКИЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 206, subjects: "р м и/ф" },
+                    { name: "ТЕПЛОЭНЕРГЕТИКА И ТЕПЛОТЕХНИКА", score: 256, subjects: "р м и/ф" },
+                    { name: "ЭЛЕКТРОЭНЕРГЕТИКА И ЭЛЕКТРОТЕХНИКА", score: 207, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ МЕХАНИКА", score: 183, subjects: "р м и/ф" },
+                    { name: "ТЕХНИЧЕСКАЯ ФИЗИКА", score: 170, subjects: "р м и/ф" },
+                    { name: "ХИМИЧЕСКАЯ ТЕХНОЛОГИЯ", score: 249, subjects: "р х м/и" },
+                    { name: "АВИАСТРОЕНИЕ", score: 221, subjects: "р м и/ф" },
+                    { name: "НАНОИНЖЕНЕРИЯ", score: 214, subjects: "р м и/х/ф" },
+                    { name: "БИЗНЕС-ИНФОРМАТИКА", score: 269, subjects: "р м и/о" }
+                ],
+                "СГУГиТ": [
+                    { name: "ИНФОРМАЦИОННЫЕ СИСТЕМЫ И ТЕХНОЛОГИИ", score: 170, subjects: "р м и" },
+                    { name: "ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ", score: 170, subjects: "р м и" },
+                    { name: "ПРИБОРОСТРОЕНИЕ", score: 160, subjects: "р м и/ф" },
+                    { name: "ТЕХНОСФЕРНАЯ БЕЗОПАСНОСТЬ", score: 149, subjects: "р м и/х/ф" },
+                    { name: "ГЕОДЕЗИЯ И ДИСТАНЦИОННОЕ ЗОНДИРОВАНИЕ", score: 189, subjects: "р м и/ф" },
+                    { name: "ИННОВАТИКА", score: 180, subjects: "р м и/х/ф" },
+                    { name: "БОЕПРИПАСЫ И ВЗРЫВАТЕЛИ", score: 151, subjects: "р м и/ф" },
+                    { name: "ПРИКЛАДНАЯ ГЕОДЕЗИЯ", score: 201, subjects: "р м и/ф" },
+                    { name: "ГОРНОЕ ДЕЛО", score: 189, subjects: "р м и/ф" }
+                ]
+            }
+        };
+
+        // Текущее состояние выбора
+        let currentState = {
+            city: null,
+            university: null,
+            specialty: null
+        };
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCities();
+            updateProgressBar();
+        });
+
+        // Инициализация списка городов
+        function initializeCities() {
+            const citiesContainer = document.getElementById('cities-container');
+            citiesContainer.innerHTML = '';
+            
+            Object.keys(universitiesData).forEach(city => {
+                const totalUniversities = Object.keys(universitiesData[city]).length;
+                const totalSpecialties = Object.values(universitiesData[city]).reduce((sum, uni) => sum + uni.length, 0);
+                
+                const cityCard = document.createElement('div');
+                cityCard.className = 'option-card';
+                cityCard.innerHTML = `
+                    <img src="${cityImages[city]}" alt="${city}" class="option-image">
+                    <div class="city-name">${city}</div>
+                    <div class="stats">${totalUniversities} ${getUniversityWord(totalUniversities)} • ${totalSpecialties} ${getSpecialtyWord(totalSpecialties)}</div>
+                `;
+                cityCard.addEventListener('click', () => selectCity(city, cityCard));
+                citiesContainer.appendChild(cityCard);
+            });
+        }
+
+        // Функции для правильного склонения слов
+        function getUniversityWord(count) {
+            if (count % 10 === 1 && count % 100 !== 11) return 'вуз';
+            if ([2,3,4].includes(count % 10) && ![12,13,14].includes(count % 100)) return 'вуза';
+            return 'вузов';
+        }
+
+        function getSpecialtyWord(count) {
+            if (count % 10 === 1 && count % 100 !== 11) return 'специальность';
+            if ([2,3,4].includes(count % 10) && ![12,13,14].includes(count % 100)) return 'специальности';
+            return 'специальностей';
+        }
+
+        // Выбор города
+        function selectCity(city, element) {
+            currentState.city = city;
+            
+            // Сброс выбранных элементов
+            document.querySelectorAll('#cities-container .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Выделение выбранного элемента
+            element.classList.add('selected');
+            
+            // Автоматический переход к следующему шагу
+            setTimeout(() => {
+                nextStep();
+            }, 300);
+        }
+
+        // Инициализация списка вузов для выбранного города
+        function initializeUniversities(city) {
+            const universitiesContainer = document.getElementById('universities-container');
+            universitiesContainer.innerHTML = '';
+            
+            Object.keys(universitiesData[city]).forEach(university => {
+                const specialtyCount = universitiesData[city][university].length;
+                
+                const universityCard = document.createElement('div');
+                universityCard.className = 'option-card';
+                universityCard.innerHTML = `
+                    <img src="${universityImages[university]}" alt="${university}" class="option-image">
+                    <div class="university-name">${university}</div>
+                    <div class="stats">${specialtyCount} ${getSpecialtyWord(specialtyCount)}</div>
+                `;
+                universityCard.addEventListener('click', () => selectUniversity(university, universityCard));
+                universitiesContainer.appendChild(universityCard);
+            });
+        }
+
+        // Выбор вуза
+        function selectUniversity(university, element) {
+            currentState.university = university;
+            
+            // Сброс выбранных элементов
+            document.querySelectorAll('#universities-container .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Выделение выбранного элемента
+            element.classList.add('selected');
+            
+            // Автоматический переход к следующему шагу
+            setTimeout(() => {
+                nextStep();
+            }, 300);
+        }
+
+        // Инициализация списка специальностей для выбранного вуза
+        function initializeSpecialties(city, university) {
+            const specialtiesContainer = document.getElementById('specialties-container');
+            specialtiesContainer.innerHTML = '';
+            
+            universitiesData[city][university].forEach((specialty, index) => {
+                const fullSubjects = parseSubjects(specialty.subjects);
+                
+                const specialtyCard = document.createElement('div');
+                specialtyCard.className = 'option-card';
+                specialtyCard.innerHTML = `
+                    <div class="specialty-name">${specialty.name}</div>
+                    <div>Баллы на бюджет 2025: <strong>${specialty.score}</strong></div>
+                    <div class="subjects" style="justify-content: flex-start; margin-top: 8px;">
+                        ${fullSubjects.map(subj => `<span class="subject-tag">${subj}</span>`).join('')}
+                    </div>
+                `;
+                specialtyCard.addEventListener('click', () => selectSpecialty(index, specialtyCard));
+                specialtiesContainer.appendChild(specialtyCard);
+            });
+        }
+
+        // Выбор специальности
+        function selectSpecialty(specialtyIndex, element) {
+            currentState.specialty = specialtyIndex;
+            
+            // Сброс выбранных элементов
+            document.querySelectorAll('#specialties-container .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Выделение выбранного элемента
+            element.classList.add('selected');
+            
+            // Автоматический переход к следующему шагу
+            setTimeout(() => {
+                nextStep();
+            }, 300);
+        }
+
+        // Подготовка информации о выбранной специальности
+        function prepareSpecialtyInfo() {
+            const specialty = universitiesData[currentState.city][currentState.university][currentState.specialty];
+            const fullSubjects = parseSubjects(specialty.subjects);
+            const description = specialtyDescriptions[specialty.name] || "Описание специальности временно недоступно.";
+            
+            // Получение ссылки на учебный план
+            const curriculumLink = curriculumLinks[currentState.university]?.[specialty.name] || null;
+            
+            const detailsContainer = document.getElementById('specialty-details');
+            
+            let curriculumHTML = '';
+            if (curriculumLink) {
+                curriculumHTML = `
+                    <div class="curriculum-link">
+                        <a href="${curriculumLink}" target="_blank">
+                            📚 Ознакомиться с учебным планом
+                        </a>
+                    </div>
+                `;
+            }
+            
+            detailsContainer.innerHTML = `
+                <div class="specialty-info">
+                    <img src="${universityImages[currentState.university]}" alt="${currentState.university}" class="specialty-image">
+                    <div class="info-row">
+                        <span class="info-label">Специальность:</span>
+                        <span class="info-value">${specialty.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Вуз:</span>
+                        <span class="info-value">${currentState.university}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Город:</span>
+                        <span class="info-value">${currentState.city}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Баллы на бюджет 2025:</span>
+                        <span class="info-value">${specialty.score}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Предметы для сдачи:</span>
+                        <div class="subjects">
+                            ${fullSubjects.map(subj => `<span class="subject-tag">${subj}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="description">
+                        <strong>О специальности:</strong><br>
+                        ${description}
+                        ${curriculumHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Навигация между шагами
+        let currentStep = 1;
+
+        function nextStep() {
+            if (currentStep < 4) {
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                currentStep++;
+                
+                // Подготовка данных для следующего шага
+                if (currentStep === 2 && currentState.city) {
+                    initializeUniversities(currentState.city);
+                } else if (currentStep === 3 && currentState.city && currentState.university) {
+                    initializeSpecialties(currentState.city, currentState.university);
+                } else if (currentStep === 4 && currentState.city && currentState.university && currentState.specialty !== null) {
+                    prepareSpecialtyInfo();
+                }
+                
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgressBar();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgressBar();
+            }
+        }
+
+        function restartGuide() {
+            currentStep = 1;
+            currentState = {
+                city: null,
+                university: null,
+                specialty: null
+            };
+            
+            // Сброс всех шагов
+            document.querySelectorAll('.step').forEach((step, index) => {
+                step.classList.toggle('active', index === 0);
+            });
+            
+            // Сброс выбора
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            updateProgressBar();
+        }
+
+        // Обновление прогресс-бара
+        function updateProgressBar() {
+            for (let i = 1; i <= 4; i++) {
+                const stepElement = document.getElementById(`step${i}-progress`);
+                if (i < currentStep) {
+                    stepElement.className = 'progress-step completed';
+                } else if (i === currentStep) {
+                    stepElement.className = 'progress-step active';
+                } else {
+                    stepElement.className = 'progress-step';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
